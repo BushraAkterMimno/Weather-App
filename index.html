@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #e9d8fd, #edf2ff);
+      font-family: "Poppins", sans-serif;
+    }
+  </style>
+</head>
+
+<body class="p-6">
+  <div class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg border">
+
+    <h1 class="text-4xl font-extrabold text-indigo-800 mb-4 text-center">
+      Weather App
+    </h1>
+
+    <!-- Search -->
+    <div class="flex gap-4 mb-6">
+      <input
+        id="cityInput"
+        type="text"
+        placeholder="For example: Dhaka"
+        class="w-full border p-3 rounded-lg"
+      />
+      <button
+        id="searchBtn"
+        class="bg-indigo-700 text-white px-5 py-3 rounded-lg font-bold hover:bg-indigo-900"
+      >
+        Check details
+      </button>
+    </div>
+
+    <!-- Main Weather -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <!-- Left -->
+      <div
+        class="p-6 bg-indigo-50 rounded-xl shadow-inner text-indigo-900 text-center"
+      >
+        <h2 id="cityName" class="text-3xl font-bold mb-2">—</h2>
+
+        <p id="errorMsg" class="text-red-600 font-medium mb-3"></p>
+
+        <h3 class="text-7xl font-extrabold" id="temp">—°C</h3>
+
+        <img id="weatherIcon" src="assets/weather-icon.png" class="mx-auto my-4 w-30 h-28" />
+
+        <p id="weatherText" class="text-xl font-semibold">—</p>
+      </div>
+
+      <!-- Right -->
+      <div class="p-6 bg-white shadow rounded-xl border">
+        <p class="flex justify-between mb-3 text-lg">
+          <span>Humidity</span> <span id="humidity">— %</span>
+        </p>
+        <p class="flex justify-between mb-3 text-lg">
+          <span>Wind</span> <span id="wind">— m/s</span>
+        </p>
+        <p class="flex justify-between mb-3 text-lg">
+          <span>Clouds</span> <span id="clouds">— %</span>
+        </p>
+        <p class="flex justify-between mb-3 text-lg">
+          <span>Pressure</span> <span id="pressure">— hPa</span>
+        </p>
+
+        <p class="text-sm text-gray-500 mt-4">
+          Can’t find it? Try the city name in English (e.g., "New York").
+        </p>
+      </div>
+    </div>
+
+    <p class="text-center text-sm mt-10 text-gray-600">
+      Data: OpenWeatherMap
+    </p>
+  </div>
+
+  <script>
+    const API_KEY = "1c7f80c8f2f545ba12652a725068142a"; 
+    const BASE = "https://api.openweathermap.org/data/2.5/weather";
+
+    const cityInput = document.getElementById("cityInput");
+    const searchBtn = document.getElementById("searchBtn");
+
+    // UI Elements
+    const cityName = document.getElementById("cityName");
+    const errorMsg = document.getElementById("errorMsg");
+    const temp = document.getElementById("temp");
+    const weatherIcon = document.getElementById("weatherIcon");
+    const weatherText = document.getElementById("weatherText");
+    const humidity = document.getElementById("humidity");
+    const wind = document.getElementById("wind");
+    const clouds = document.getElementById("clouds");
+    const pressure = document.getElementById("pressure");
+
+    async function getWeather(city) {
+      errorMsg.textContent = "";
+      cityName.textContent = "Loading...";
+
+      try {
+        const url = `${BASE}?q=${city}&appid=${API_KEY}&units=metric&lang=bn`;
+        const res = await fetch(url);
+
+        if (!res.ok) {
+          cityName.textContent = "Something went wrong";
+          errorMsg.textContent = `(${res.status}) Unauthorized / City not found`;
+          return;
+        }
+
+        const data = await res.json();
+
+        cityName.textContent = data.name;
+        temp.textContent = `${Math.round(data.main.temp)}°C`;
+        weatherText.textContent = data.weather[0].description;
+        humidity.textContent = data.main.humidity + " %";
+        wind.textContent = data.wind.speed + " m/s";
+        clouds.textContent = data.clouds.all + " %";
+        pressure.textContent = data.main.pressure + " hPa";
+
+        weatherIcon.src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+      } catch (err) {
+        cityName.textContent = "Something went wrong";
+        errorMsg.textContent = "There was an internet problem or an API error!";
+      }
+    }
+
+    searchBtn.addEventListener("click", () => {
+      const city = cityInput.value.trim();
+      if (city) getWeather(city);
+    });
+
+    cityInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        const city = cityInput.value.trim();
+        if (city) getWeather(city);
+      }
+    });
+  </script>
+</body>
+</html>
